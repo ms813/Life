@@ -7,29 +7,13 @@ gridSize(40, 40)
 	for (int i = 0; i < gridSize.x; i++){
 		std::vector<Cell> col;
 		for (int j = 0; j < gridSize.y; j++){					
-			col.push_back(Cell(sf::Vector2i(i, j)));				
+			col.push_back(Cell(cellSize, sf::Vector2i(i, j)));
 		}		
 		cells.push_back(col);
 	}
 
 	//view.setCenter(sf::Vector2f(gridSize / 2));
 	//window.setView(view);
-
-	cells[1][7].birth();
-
-	cells[3][7].birth();
-	cells[3][6].birth();
-
-	cells[5][5].birth();
-	cells[5][4].birth();
-	cells[5][3].birth();
-
-	cells[7][4].birth();
-	cells[7][3].birth();
-	cells[7][2].birth();
-
-	cells[8][3].birth();
-
 }
 
 void Game::run(){
@@ -47,9 +31,12 @@ void Game::run(){
 		{
 			timeSinceLastUpdate -= TimePerFrame;
 
-			processEvents();
-			update(TimePerFrame);
+			if (running){
+				update(TimePerFrame);
+			}
 
+			processEvents();
+			handleInput();
 		}		
 
 		render();
@@ -61,8 +48,28 @@ void Game::processEvents(){
 	sf::Event event;
 	while (window.pollEvent(event))
 	{
-		if (event.type == sf::Event::Closed)
+		if (event.type == sf::Event::Closed){
 			window.close();
+		}	
+
+		if (event.type == sf::Event::KeyPressed){
+			if (event.key.code == sf::Keyboard::Return){
+				running = true;
+			}
+		}
+	}
+}
+
+void Game::handleInput(){
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)){
+		sf::Vector2i localPosition = sf::Mouse::getPosition(window);
+
+		sf::Vector2i tileId(round(localPosition.x / cellSize), round(localPosition.y / cellSize));		
+
+		if (tileId.x <= gridSize.x && tileId.x >= 0 && tileId.y <= gridSize.y && tileId.y >= 0){
+			cells[tileId.x][tileId.y].birth();
+			std::cout << tileId << std::endl;			
+		}
 	}
 }
 
@@ -81,7 +88,9 @@ void Game::render(){
 void Game::update(sf::Time _timePerFrame){
 
 	turn++;
-	std::cout << "Turn " << turn << std::endl;
+	if (logging){
+		std::cout << "Turn " << turn << std::endl;
+	}	
 
 	for (int i = 0; i < cells.size(); i++){		
 		for (int j = 0; j < cells[0].size(); j++){

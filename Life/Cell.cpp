@@ -1,12 +1,12 @@
 #include "Cell.h"
 
-Cell::Cell(sf::Vector2i _gridPos) :
+Cell::Cell(float _size, sf::Vector2i _gridPos) :
 gridPos(_gridPos),
-shape(sf::Vector2f(size, size)),
+shape(sf::Vector2f(_size, _size)),
 state(false)
 {	
 	shape.setFillColor(sf::Color::Black);
-	shape.setPosition(sf::Vector2f(gridPos) * size);
+	shape.setPosition(sf::Vector2f(gridPos) * _size);
 }
 
 void Cell::update(){

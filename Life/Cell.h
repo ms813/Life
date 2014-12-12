@@ -7,7 +7,7 @@
 class Cell{
 public:
 
-	Cell(sf::Vector2i _gridPos);
+	Cell(float _size, sf::Vector2i _gridPos);
 
 	void birth();
 	void kill();
@@ -36,7 +36,6 @@ public:
 
 private:
 	sf::RectangleShape shape;
-	float size = 5.0f;
 	sf::Vector2i gridPos;
 	bool state;
 	std::string flag;

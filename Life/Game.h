@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 #include "Cell.h"
 
@@ -23,19 +24,22 @@ private:
 	
 	sf::Vector2i gridSize;
 	std::vector<std::vector<Cell>> cells;
+	bool running = false;
 
 	bool logging = false;
 
 	int turn = 0;
 
+	float cellSize = 5.0f;
 
 	void processEvents();
+	void handleInput();
 	void render();
 	void update(sf::Time);
 	int countLiveNeighbours(Cell *cell);
 	int gridWrap(int coord, int gridDim);
 
-	const sf::Time TimePerFrame = sf::seconds(1.f / 10.f);	
+	const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);	
 };
 
 #endif
