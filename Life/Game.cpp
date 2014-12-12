@@ -67,8 +67,23 @@ void Game::handleInput(){
 		sf::Vector2i tileId(round(localPosition.x / cellSize), round(localPosition.y / cellSize));		
 
 		if (tileId.x <= gridSize.x && tileId.x >= 0 && tileId.y <= gridSize.y && tileId.y >= 0){
-			cells[tileId.x][tileId.y].birth();
-			std::cout << tileId << std::endl;			
+			
+			std::string status;
+			if (cells[tileId.x][tileId.y].getState()){
+				//clicked on a live cell
+				cells[tileId.x][tileId.y].kill();
+				status = "killed";
+			}
+			else{
+				//clicked on a dead cell
+				cells[tileId.x][tileId.y].birth();
+				status = "birthed";
+			}
+			
+			if (logging){
+				std::cout << "Cell at " << tileId << " " << status << std::endl;
+			}
+			
 		}
 	}
 }
