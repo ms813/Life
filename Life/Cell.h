@@ -2,7 +2,7 @@
 #define CELL_H
 
 #include <SFML\Graphics.hpp>
-#include <string>
+#include "CellStatus.h"
 
 class Cell{
 public:
@@ -12,9 +12,13 @@ public:
 	void birth();
 	void kill();
 
-	void setFlag(std::string _flag){
+	void setFlag(CellStatus _flag){
 		flag = _flag;
 	};
+
+	void clearFlag(){
+		flag = CellStatus::NONE;
+	}
 
 	sf::RectangleShape getShape(){
 		return shape;
@@ -38,7 +42,7 @@ private:
 	sf::RectangleShape shape;
 	sf::Vector2i gridPos;
 	bool state;
-	std::string flag;
+	CellStatus flag;	
 };
 
 #endif

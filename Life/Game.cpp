@@ -2,7 +2,8 @@
 
 Game::Game() :
 window(sf::VideoMode(200, 200), "Life"),
-gridSize(40, 40)
+cellSize(5.0f),
+gridSize(40,40)
 {
 	for (int i = 0; i < gridSize.x; i++){
 		std::vector<Cell> col;
@@ -11,9 +12,6 @@ gridSize(40, 40)
 		}		
 		cells.push_back(col);
 	}
-
-	//view.setCenter(sf::Vector2f(gridSize / 2));
-	//window.setView(view);
 }
 
 void Game::run(){
@@ -53,10 +51,18 @@ void Game::processEvents(){
 		}	
 
 		if (event.type == sf::Event::KeyPressed){
-			if (event.key.code == sf::Keyboard::Return){
-				running = true;
-			}
+			handleKeyPress(event);
 		}
+	}
+}
+
+void Game::handleKeyPress(sf::Event event){
+	if (event.key.code == sf::Keyboard::Return){
+		running = !running;		
+	}
+
+	if (event.key.code == sf::Keyboard::Escape){
+		reset();
 	}
 }
 
@@ -72,7 +78,7 @@ void Game::handleInput(){
 			if (cells[tileId.x][tileId.y].getState()){
 				//clicked on a live cell
 				cells[tileId.x][tileId.y].kill();
-				status = "killed";
+				status = "killed"; 
 			}
 			else{
 				//clicked on a dead cell
@@ -115,7 +121,7 @@ void Game::update(sf::Time _timePerFrame){
 
 			//if fewer than 2 neighbors, die of underpopulation
 			if (liveNeighbours < 2 && cell->getState()){
-				cells[i][j].setFlag("kill");
+				cells[i][j].setFlag(CellStatus::BIRTH);
 				if (logging){
 					std::cout << "Cell " << cell->getGridPos() << " had " << liveNeighbours << " neighbour(s) so dies of underpopulation" << std::endl;
 				}
@@ -125,14 +131,14 @@ void Game::update(sf::Time _timePerFrame){
 
 			//if greater than 3 live neighbours, die of overcrowding
 			if (liveNeighbours > 3 && cell->getState()){
-				cells[i][j].setFlag("kill");
+				cells[i][j].setFlag(CellStatus::KILL);
 				if (logging){
 					std::cout << "Cell " << cell->getGridPos() << " dies of overcrowding" << std::endl;
 				}
 			}
 
 			if (liveNeighbours == 3 && !cell->getState()){
-				cells[i][j].setFlag("birth");
+				cells[i][j].setFlag(CellStatus::BIRTH);
 				if (logging){
 					std::cout << "Cell " << cell->getGridPos() << " is born" << std::endl;
 				}
@@ -194,6 +200,18 @@ int Game::countLiveNeighbours(Cell *cell){
 	}	
 	
 	return live;
+}
+
+void Game::reset(){
+	running = false;
+	turn = 0;
+
+	for (int i = 0; i < gridSize.x; i++){
+		for (int j = 0; j < gridSize.y; j++){
+			cells[i][j].kill();
+			cells[i][j].clearFlag();
+		}
+	}
 }
 
 int Game::gridWrap(int coord, int gridDim){

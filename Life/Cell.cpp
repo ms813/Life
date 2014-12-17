@@ -10,10 +10,10 @@ state(false)
 }
 
 void Cell::update(){
-	if (flag == "kill"){
+	if (flag == CellStatus::KILL){
 		kill();
 	}
-	else if (flag == "birth"){
+	else if (flag == CellStatus::BIRTH){
 		birth();
 	}
 }
@@ -27,3 +27,4 @@ void Cell::kill(){
 	state = false;
 	shape.setFillColor(sf::Color::Black);
 }
+
