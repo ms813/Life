@@ -21,6 +21,7 @@ private:
 	sf::RenderWindow window;
 	sf::View view;
 	const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
+	sf::Time turnTime;
 	
 	sf::Vector2i gridSize;
 	std::vector<std::vector<Cell>> cells;

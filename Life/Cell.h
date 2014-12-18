@@ -12,12 +12,12 @@ public:
 	void birth();
 	void kill();
 
-	void setFlag(CellStatus _flag){
-		flag = _flag;
+	void setNextFlag(CellStatus _flag){
+		nextFlag = _flag;
 	};
 
-	void clearFlag(){
-		flag = CellStatus::NONE;
+	void clearNextFlag(){
+		nextFlag = CellStatus::NONE;
 	}
 
 	sf::RectangleShape getShape(){
@@ -38,11 +38,12 @@ public:
 
 	void update();
 
+
 private:
 	sf::RectangleShape shape;
 	sf::Vector2i gridPos;
 	bool state;
-	CellStatus flag;	
+	CellStatus nextFlag;	
 };
 
 #endif

@@ -9,11 +9,11 @@ state(false)
 	shape.setPosition(sf::Vector2f(gridPos) * _size);
 }
 
-void Cell::update(){
-	if (flag == CellStatus::KILL){
+void Cell::update(){	
+	if (nextFlag == CellStatus::KILL){
 		kill();
 	}
-	else if (flag == CellStatus::BIRTH){
+	else if (nextFlag == CellStatus::BIRTH){
 		birth();
 	}
 }
@@ -21,10 +21,12 @@ void Cell::update(){
 void Cell::birth(){
 	state = true;
 	shape.setFillColor(sf::Color::White);
+	clearNextFlag();
 }
 
 void Cell::kill(){
 	state = false;
 	shape.setFillColor(sf::Color::Black);
+	clearNextFlag();
 }
 

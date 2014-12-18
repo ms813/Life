@@ -1,10 +1,11 @@
 #include "Game.h"
 
 Game::Game() :
-window(sf::VideoMode(200, 200), "Life"),
+window(sf::VideoMode(400, 400), "Life"),
 cellSize(5.0f),
-gridSize(40,40)
+turnTime(sf::seconds(0.1f))
 {
+	gridSize = sf::Vector2i(window.getSize().x / cellSize, window.getSize().y / cellSize);
 	for (int i = 0; i < gridSize.x; i++){
 		std::vector<Cell> col;
 		for (int j = 0; j < gridSize.y; j++){					
@@ -18,19 +19,21 @@ void Game::run(){
 
 	sf::Clock clock;
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
+	sf::Time turnClock = sf::Time::Zero;
 
 	while (window.isOpen())
 	{
-
-		sf::Time elapsedTime = clock.restart();
+		sf::Time elapsedTime = clock.restart();		
 		timeSinceLastUpdate += elapsedTime;
 
 		while (timeSinceLastUpdate > TimePerFrame)
 		{
-			timeSinceLastUpdate -= TimePerFrame;
+			turnClock += timeSinceLastUpdate;
+			timeSinceLastUpdate -= TimePerFrame;			
 
-			if (running){
+			if (running && (turnClock > turnTime)){
 				update(TimePerFrame);
+				turnClock = sf::Time::Zero;
 			}
 
 			processEvents();
@@ -52,7 +55,7 @@ void Game::processEvents(){
 
 		if (event.type == sf::Event::KeyPressed){
 			handleKeyPress(event);
-		}
+		}		
 	}
 }
 
@@ -64,6 +67,10 @@ void Game::handleKeyPress(sf::Event event){
 	if (event.key.code == sf::Keyboard::Escape){
 		reset();
 	}
+
+	if (event.key.code == sf::Keyboard::Right){
+		update(sf::Time());
+	}
 }
 
 void Game::handleInput(){
@@ -72,24 +79,32 @@ void Game::handleInput(){
 
 		sf::Vector2i tileId(round(localPosition.x / cellSize), round(localPosition.y / cellSize));		
 
-		if (tileId.x <= gridSize.x && tileId.x >= 0 && tileId.y <= gridSize.y && tileId.y >= 0){
-			
-			std::string status;
-			if (cells[tileId.x][tileId.y].getState()){
-				//clicked on a live cell
-				cells[tileId.x][tileId.y].kill();
-				status = "killed"; 
-			}
-			else{
-				//clicked on a dead cell
+		if (tileId.x <= gridSize.x && tileId.x >= 0 && tileId.y <= gridSize.y && tileId.y >= 0){			
+		
+			if (!cells[tileId.x][tileId.y].getState()){
+				//left clicked on a dead cell				
 				cells[tileId.x][tileId.y].birth();
-				status = "birthed";
+				if (logging){
+					std::cout << "Cell at " << tileId << " birthed" << std::endl;
+				}
+			}			
+		}
+	}
+
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Right)){
+		sf::Vector2i localPosition = sf::Mouse::getPosition(window);
+
+		sf::Vector2i tileId(round(localPosition.x / cellSize), round(localPosition.y / cellSize));
+
+		if (tileId.x <= gridSize.x && tileId.x >= 0 && tileId.y <= gridSize.y && tileId.y >= 0){
+
+			if (cells[tileId.x][tileId.y].getState()){
+				//right clicked on a live cell				
+				cells[tileId.x][tileId.y].kill();
+				if (logging){
+					std::cout << "Cell at " << tileId << " killed" << std::endl;
+				}
 			}
-			
-			if (logging){
-				std::cout << "Cell at " << tileId << " " << status << std::endl;
-			}
-			
 		}
 	}
 }
@@ -111,17 +126,16 @@ void Game::update(sf::Time _timePerFrame){
 	turn++;
 	if (logging){
 		std::cout << "Turn " << turn << std::endl;
-	}	
+	}		
 
 	for (int i = 0; i < cells.size(); i++){		
-		for (int j = 0; j < cells[0].size(); j++){
-
+		for (int j = 0; j < cells[0].size(); j++){		
 			Cell *cell = &cells[i][j];
 			int liveNeighbours = countLiveNeighbours(cell);			
 
 			//if fewer than 2 neighbors, die of underpopulation
 			if (liveNeighbours < 2 && cell->getState()){
-				cells[i][j].setFlag(CellStatus::BIRTH);
+				cells[i][j].setNextFlag(CellStatus::KILL);
 				if (logging){
 					std::cout << "Cell " << cell->getGridPos() << " had " << liveNeighbours << " neighbour(s) so dies of underpopulation" << std::endl;
 				}
@@ -131,24 +145,24 @@ void Game::update(sf::Time _timePerFrame){
 
 			//if greater than 3 live neighbours, die of overcrowding
 			if (liveNeighbours > 3 && cell->getState()){
-				cells[i][j].setFlag(CellStatus::KILL);
+				cells[i][j].setNextFlag(CellStatus::KILL);
 				if (logging){
 					std::cout << "Cell " << cell->getGridPos() << " dies of overcrowding" << std::endl;
 				}
 			}
 
 			if (liveNeighbours == 3 && !cell->getState()){
-				cells[i][j].setFlag(CellStatus::BIRTH);
+				cells[i][j].setNextFlag(CellStatus::BIRTH);
 				if (logging){
 					std::cout << "Cell " << cell->getGridPos() << " is born" << std::endl;
 				}
-			}
+			}			
 		}
 	}
 
 	for (int i = 0; i < cells.size(); i++){
 		for (int j = 0; j < cells[0].size(); j++){
-			cells[i][j].update();
+			cells[i][j].update();			
 		}
 	}
 }
@@ -208,8 +222,7 @@ void Game::reset(){
 
 	for (int i = 0; i < gridSize.x; i++){
 		for (int j = 0; j < gridSize.y; j++){
-			cells[i][j].kill();
-			cells[i][j].clearFlag();
+			cells[i][j].kill();			
 		}
 	}
 }
